@@ -29,7 +29,7 @@ from flask import Flask, request
 # print([i.data() for i in bc.current_trxs])
 app = Flask(__name__)
 bc = Blockchain()
-sk, pk, addr = account.loadKeys("./secret_key.pem", "./public_key.pem")
+sk, pk, addr = account.loadKeys("./w1/secret_key.pem", "./w1/public_key.pem")
 # sk, pk, addr = account.generateKey()
 
 print(addr)

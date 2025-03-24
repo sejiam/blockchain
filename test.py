@@ -1,18 +1,7 @@
-from blockchain import Blockchain
-from transaction import Transaction
-from account import loadKeys
-from signtrx import signTRX
-from miner import miner
-from stringify import stringify
-from sha256 import hash
-bc = Blockchain()
-sk, pk, addr = loadKeys("./secret_key.pem", "./public_key.pem")
-sk1, pk1, addr1 = loadKeys("./w1/secret_key.pem", "./w1/public_key.pem")
-sk2, pk2, addr2 = loadKeys("./w2/secret_key.pem", "./w2/public_key.pem")
-chain = [{'index': 0, 'prev_hash': 0, 'proof': 0, 'timestamp': 1742570179.9924562, 'trxs': [{'amount': 1000, 'recipient': '6f9d536661baa43659145aaf7f9715f197f74c530a8b913c7ae8797396de0a5b', 'sender': '0'}]}, {'index': 1, 'prev_hash': 'da6f4d8da394766c6a7fff1e8418c7fa15e404812fd3a80324f90097b34e912b', 'proof': 92589, 'timestamp': 1742570207.0884306, 'trxs': [
-    {'amount': 100, 'recipient': 'c1c04a6e8043d029ebf2853677cdc44dd2961f6c01a629f5443d42b2924336c7', 'sender': '6f9d536661baa43659145aaf7f9715f197f74c530a8b913c7ae8797396de0a5b'}, {'amount': 100, 'recipient': 'c1c04a6e8043d029ebf2853677cdc44dd2961f6c01a629f5443d42b2924336c7', 'sender': '6f9d536661baa43659145aaf7f9715f197f74c530a8b913c7ae8797396de0a5b'}]}]
-fb = chain[0]
-cb = chain[1]
-data = "index:0,prev_hash:0,proof:0,timestamp:1742570179.9924562,trxs:[{'amount': 1000, 'recipient': '6f9d536661baa43659145aaf7f9715f197f74c530a8b913c7ae8797396de0a5b', 'sender': '0'}],"
-# print(hash('0'+hash((data))+'72923'))
-print(hash(stringify(fb)))
+from urllib.parse import urlparse
+
+
+# print(urlparse("http://127.0.0.1:5000"))
+chain = {"chain": [{"index": 0, "prev_hash": 0, "proof": 0, "timestamp": 1742756741.185295, "trxs": [{"amount": 1000, "recipient": "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e", "sender": "0"}]}, {"index": 1, "prev_hash": "3d826b2d9a9cb338746f7a68cac2d539fc0a03d482c3e1da761538d2123cd2a6", "proof": 111546, "timestamp": 1742756970.4289875, "trxs": [{"amount": 5, "recipient": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce", "sender": "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e"}, {"amount": 5, "recipient": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce", "sender": "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e"}]}, {"index": 2, "prev_hash": "34ebb1adc01661d3ac01c5841d806ce79f419aaad4a20c6c67b262ee995da08a", "proof": 55105, "timestamp": 1742757073.4674368, "trxs": [{"amount": 1, "recipient": "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e", "sender": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce"}, {"amount": 1, "recipient": "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e", "sender": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce"}]}, {
+    "index": 3, "prev_hash": "dc116265144d67c06ad7b69bb9cf704e16b3679bcc72034c4ec231ddae0e0098", "proof": 62004, "timestamp": 1742757228.449518, "trxs": [{"amount": 100, "recipient": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce", "sender": "0"}, {"amount": 1, "recipient": "1", "sender": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce"}, {"amount": 1, "recipient": "1", "sender": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce"}]}, {"index": 4, "prev_hash": "6e5c56b8d4d1c3bc873783f74a984a7caae773db56658438a05a8475198ec467", "proof": 212231, "timestamp": 1742757334.077558, "trxs": [{"amount": 100, "recipient": "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e", "sender": "0"}, {"amount": 5, "recipient": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce", "sender": "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e"}, {"amount": 5, "recipient": "72f1220ab7d8d7ce1d06b7188ae7139d93cde56509f7b6fb011bd5fd5cead6ce", "sender": "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e"}]}], "length": 5}
+print(chain['chain'][3]['trxs'])

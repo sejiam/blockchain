@@ -5,30 +5,30 @@ from stringify import stringify
 from sha256 import hash
 from urllib.parse import urlparse
 import requests
-sk, pk, addr = account.loadKeys("./secret_key.pem", "./public_key.pem")
+from broadcast import broadcast
+
+addr = "5661ab781623bdbdf4a045b5c695cb1880baff78619a62b19b16a7f45fe6e84e"
 
 
 class Blockchain:
+    REWARD = 100
     MIN_TRXS_COUNT = 1
 
     def __init__(self):
         self.chain = []
         self.current_trxs = []
+        self.nodes = set()
         genesis_trx = Transaction("0", addr, 1000)
         self.new_trx(genesis_trx, "0", "0")
         self.new_block(0, 0)
-        self.nodes = set()
 
     def register_node(self, address):
-        self.nodes.add(address)
-        # parsed_url = urlparse(address)
+        parsed_url = urlparse(address)
 
-        # if parsed_url.netloc:
-        #     self.nodes.add(parsed_url.netloc)
-        # elif parsed_url.path:
-        #     self.nodes.add(parsed_url.path)
-        # else:
-        #     raise Exception("invalid url")
+        if parsed_url.netloc and parsed_url.scheme:
+            self.nodes.add(parsed_url.scheme+'://'+parsed_url.netloc)
+        else:
+            raise Exception("invalid url")
 
     def valid_chain(self, chain):
         last_block = chain[0]
@@ -41,30 +41,33 @@ class Blockchain:
                 return False
             if not self.valid_POW(last_block['proof'], last_block_hash, block['proof']):
                 return False
-
             last_block = block
             current_index += 1
         return True
 
     def resolve_conflict(self):
         neighbors = self.nodes
-        print("---------", neighbors)
+        print("[neighbor nodes]:", neighbors)
         new_chain = None
         max_length = len(self.chain)
 
         for node in neighbors:
-            response = requests.get(f"http://{node}/chain")
+            response = requests.get(node+"/chain")
             if response.status_code == 200:
                 length = response.json()['length']
                 chain = response.json()['chain']
-                print("++++++++length:", length)
-                print("++++++++chain:", chain)
-                print("vvvvvvvvvvv", self.valid_chain(chain))
-                if length > max_length and self.valid_chain(chain):
-                    max_length = length
-                    new_chain = chain
+                print("[length]:", length)
+                print("[chain]:", chain)
+                print("[chain validation]:", self.valid_chain(chain))
+                if length > max_length:
+                    if self.valid_chain(chain):
+                        max_length = length
+                        new_chain = chain
+                        broadcast(self.nodes, "nodes/resolve")
+                    else:
+                        print("validation method returns false")
                 else:
-                    print("invalid chain")
+                    print("length check did not passed")
             else:
                 print('failed to connect')
         if new_chain:
@@ -83,12 +86,13 @@ class Blockchain:
             }
             self.current_trxs = []
             self.chain.append(block)
+            broadcast(self.nodes, "nodes/resolve")
             return block
         else:
             raise Exception('invalid proof')
 
     def new_trx(self, trx: Transaction, signed_trx, sender_publickey):
-        if len(self.current_trxs) == 0 and signed_trx == '0' and sender_publickey == "0":
+        if len(self.current_trxs) == 0 and signed_trx == '0' and sender_publickey == "0" and trx.amount == self.REWARD:
             self.current_trxs.append(trx)
         elif account.verify(signed_trx, stringify(trx.data()), sender_publickey):
             if self.balance(trx.sender) >= trx.amount:
@@ -98,13 +102,12 @@ class Blockchain:
         else:
             raise Exception("trx is invalid")
 
-    def proofOfWork(self, last_block):
+    def proofOfWork(self, last_block, addr):
         if len(self.current_trxs) > self.MIN_TRXS_COUNT:
             last_proof = last_block["proof"]
             last_block_hash = hash(stringify(last_block))
 
             proof = 0
-            print('started to mine')
             while not self.valid_POW(last_proof, last_block_hash, proof):
                 proof += 1
             return proof
@@ -114,8 +117,6 @@ class Blockchain:
     def valid_POW(self, last_proof, last_hash, new_proof):
         guess = f"{last_proof}{last_hash}{new_proof}"
         guess_hash = hash(guess)
-        # print(guess_hash)
-        # print(f"guess:{guess} and hash:{guess_hash}")
         return guess_hash[:4] == "0000"
 
     def balance(self, address):
